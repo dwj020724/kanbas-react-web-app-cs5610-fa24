@@ -7,6 +7,8 @@ export default function Labs(){
     return(
     <div>
       <h1>Labs</h1>
+      <h2>Name: Weijie Du</h2>
+      <a id="wd-github" href="https://github.com/dwj020724">Weijie's Github</a>
       <TOC />
       <Routes>
         <Route path="/" element={<Navigate to="Lab1" />} />
