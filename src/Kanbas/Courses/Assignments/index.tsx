@@ -1,22 +1,79 @@
 import { BsGripVertical, BsPlus } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa6";
-import LessonControlButtons from "../Modules/LessonControlButtons";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { GiNotebook } from "react-icons/gi";
 import { IoEllipsisVertical } from "react-icons/io5";
-import Assignmentscontrol from "./Assignmentscontrol";
-import { useParams } from "react-router";
-import * as db from "../../Database";
+import { useNavigate, useParams } from "react-router";
+import { FaTrash } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { deleteAssignment } from "./reducer";
 
+import { HiMagnifyingGlass } from "react-icons/hi2";
+import GreenCheckmark from "../Modules/GreenCheckmark";
 export default function Assignments() {
   const { cid } = useParams();
-  const assignments = db.assignments.filter(
-    (assignment) => assignment.course === cid
-  );
+  const assignments = useSelector((state: any) => 
+    state.assignmentsReducer.assignments.filter(
+        (assignment: any) => assignment.course === cid
+    )
+);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleAddAssignmentClick = () => {
+    navigate(`/Kanbas/Courses/${cid}/Assignments/new`); 
+  };
 
+  const deleteButton = (assignmentId: string) => {
+    if (window.confirm("Are you sure you want to delete this assignment?")) {
+        dispatch(deleteAssignment(assignmentId));
+    }
+};
   return (
     <div id="wd-assignments" className="text-nowrap">
-      <Assignmentscontrol />
+    <div id="wd-modules-controls" className="text-nowrap">
+      {isFaculty && (
+        <>
+      <button id="wd-add-module-btn" className="btn btn-lg btn-danger me-1 float-end"
+      onClick={handleAddAssignmentClick}>
+        <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+        Assignment</button>
+      <div className="dropdown d-inline me-1 float-end">
+        <button id="wd-publish-all-btn" className="btn btn-lg btn-secondary"
+          type="button" >
+          <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+          Group</button>
+
+      </div>
+      </>
+      )}
+      {/* Implement the View Progress and Collapse All buttons with IDs wd-view-progress and wd-collapse-all */}
+      <div
+        className="me-1"
+        style={{ position: 'relative', display: 'inline-block' }}
+      >
+        <HiMagnifyingGlass
+          style={{
+            position: 'absolute',
+            left: '10px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            pointerEvents: 'none', // Optional: allows clicks to pass through the icon
+            color: '#aaa', // Optional: change icon color
+          }}
+        />
+        <input
+          id="wd-search-assignment"
+          className="form-control form-control-lg"
+          placeholder="Search..."
+          style={{
+            paddingLeft: '35px', // Space for the icon
+          }}
+        />
+      </div>
+
+    </div>
       <br />
       <br />
 
@@ -36,13 +93,21 @@ export default function Assignments() {
           >
             40% of Total
           </p>
+          {isFaculty && (
+            <>
           <BsPlus className="fs-4 me-2" />
           <IoEllipsisVertical className="fs-4" />
+          </>
+          )}
         </div>
       </div>
 
       <ul className="wd-lessons list-group rounded-0">
-        {assignments.map((assignment) => (
+        {assignments
+        .filter(
+          (assignment:any) => assignment.course === cid
+        )
+        .map((assignment:any) => (
           <li
             key={assignment._id}
             className="wd-lesson list-group-item d-flex align-items-center p-3 ps-1"
@@ -67,7 +132,15 @@ export default function Assignments() {
               <br />
               <b>Due</b> {assignment.due_date} | {assignment.points} pts
             </div>
-            <LessonControlButtons />
+            {isFaculty && (
+            <>
+                <div className="float-end">
+                <FaTrash className="text-danger me-2 mb-1" onClick={() => deleteButton(assignment._id)}/>
+                <GreenCheckmark />
+                <IoEllipsisVertical className="fs-4" />
+              </div>
+            </>
+            )}
           </li>
         ))}
       </ul>
