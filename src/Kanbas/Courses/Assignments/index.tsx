@@ -6,10 +6,12 @@ import { IoEllipsisVertical } from "react-icons/io5";
 import { useNavigate, useParams } from "react-router";
 import { FaTrash } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
-import { deleteAssignment } from "./reducer";
-
+import { deleteAssignment, setAssignments} from "./reducer";
+import * as courseClient from "../client";
+import * as assignmentsClient from "./client"
 import { HiMagnifyingGlass } from "react-icons/hi2";
 import GreenCheckmark from "../Modules/GreenCheckmark";
+import { useEffect } from "react";
 export default function Assignments() {
   const { cid } = useParams();
   const assignments = useSelector((state: any) => 
@@ -21,12 +23,20 @@ export default function Assignments() {
   const isFaculty = currentUser?.role === "FACULTY";
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const fetchAssignments = async () => {
+    const assignments = await courseClient.findAssignmentsForCourse(cid as string)
+    dispatch(setAssignments(assignments));
+  };
+  useEffect(() => {
+    fetchAssignments();
+  },[])
   const handleAddAssignmentClick = () => {
     navigate(`/Kanbas/Courses/${cid}/Assignments/new`); 
   };
 
-  const deleteButton = (assignmentId: string) => {
+  const deleteButton = async (assignmentId: string) => {
     if (window.confirm("Are you sure you want to delete this assignment?")) {
+      await assignmentsClient.deleteAssignment(assignmentId);
         dispatch(deleteAssignment(assignmentId));
     }
 };
@@ -104,9 +114,9 @@ export default function Assignments() {
 
       <ul className="wd-lessons list-group rounded-0">
         {assignments
-        .filter(
-          (assignment:any) => assignment.course === cid
-        )
+        // .filter(
+        //   (assignment:any) => assignment.course === cid
+        // )
         .map((assignment:any) => (
           <li
             key={assignment._id}

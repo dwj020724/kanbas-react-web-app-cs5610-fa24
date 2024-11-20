@@ -3,6 +3,8 @@ import { useParams, Link, useLocation,useNavigate } from "react-router-dom";
 import * as db from "../../Database";
 import { useSelector, useDispatch } from "react-redux";
 import { addAssignment, updateAssignment } from './reducer';
+import * as courseClient from "../client";
+import * as assignmentsClient from "./client"
 
   export default function AssignmentEditor(
   ) {
@@ -31,10 +33,12 @@ useEffect(() => {
   }
 }, [aid, existingAssignment]);
 
-const Save = () => {
+const Save = async () => {
   if (aid === "new") {
+    const newAssignment = await courseClient.createAssignmentForCourse(cid as string, assignment);
       dispatch(addAssignment(assignment));
   } else {
+    await assignmentsClient.updateAssignment({ ...assignment, _id: aid })
       dispatch(updateAssignment({ ...assignment, _id: aid }));
   }
   navigate(`/Kanbas/Courses/${cid}/Assignments`);
