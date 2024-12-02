@@ -35,10 +35,10 @@ useEffect(() => {
 
 const Save = async () => {
   if (aid === "new") {
-    const newAssignment = await courseClient.createAssignmentForCourse(cid as string, assignment);
+    const newAssignment = await assignmentsClient.createAssignment(assignment);
       dispatch(addAssignment(assignment));
   } else {
-    await assignmentsClient.updateAssignment({ ...assignment, _id: aid })
+    await assignmentsClient.updateAssignment(aid as string, assignment);
       dispatch(updateAssignment({ ...assignment, _id: aid }));
   }
   navigate(`/Kanbas/Courses/${cid}/Assignments`);
